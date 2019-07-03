@@ -6,9 +6,18 @@ class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isGameFinished: false,
+      winner: null,
       squares: Array(9).fill(null),
       xIsNext: true
     };
+  }
+
+  componentDidUpdate() {
+    const { isGameFinished } = this.state;
+    if (!isGameFinished) {
+      this.isGameFinished();
+    }
   }
 
   getCurrentPlayer() {
@@ -16,30 +25,45 @@ class Board extends React.Component {
     return xIsNext ? 'X' : 'O';
   }
 
+  getStatus() {
+    const { isGameFinished, winner } = this.state;
+    let status;
+    if (!isGameFinished) {
+      status = `Prochain joueur: ${this.getCurrentPlayer()} `;
+    } else {
+      status = winner ? `${winner} a gagné` : 'Egalité';
+    }
+    return status;
+  }
+
   isGameFinished() {
-    const winningLines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6]
-    ];
     const { squares } = this.state;
 
-    for (let i = 0; i < winningLines.length; i += 1) {
-      const [a, b, c] = winningLines[i];
-      if (
-        squares[a] &&
-        squares[a] === squares[b] &&
-        squares[b] === squares[c]
-      ) {
-        return true;
+    if (Object.values(squares).indexOf(null) === -1) {
+      this.setState({ isGameFinished: true, winner: null });
+    } else {
+      const winningLines = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ];
+
+      for (let i = 0; i < winningLines.length; i += 1) {
+        const [a, b, c] = winningLines[i];
+        if (
+          squares[a] &&
+          squares[a] === squares[b] &&
+          squares[b] === squares[c]
+        ) {
+          this.setState({ isGameFinished: true, winner: squares[a] });
+        }
       }
     }
-    return false;
   }
 
   changeCurrentPlayer() {
@@ -48,14 +72,23 @@ class Board extends React.Component {
   }
 
   handleClick(i) {
-    const { squares } = this.state;
+    const { squares, isGameFinished } = this.state;
     const newSquares = { ...squares };
-    if (newSquares[i] || this.isGameFinished()) {
+    if (newSquares[i] || isGameFinished) {
       return;
     }
     newSquares[i] = this.getCurrentPlayer();
-    this.changeCurrentPlayer();
     this.setState({ squares: newSquares });
+    this.changeCurrentPlayer();
+  }
+
+  reset() {
+    this.setState({
+      isGameFinished: false,
+      winner: null,
+      squares: Array(9).fill(null),
+      xIsNext: true
+    });
   }
 
   renderSquare(i) {
@@ -71,16 +104,9 @@ class Board extends React.Component {
   }
 
   render() {
-    let status;
-    if (this.isGameFinished()) {
-      status = `${this.getCurrentPlayer()} a gagné`;
-    } else {
-      status = `Prochain joueur: ${this.getCurrentPlayer()} `;
-    }
-
     return (
       <div>
-        <div className="status">{status}</div>
+        {<div className="status">{this.getStatus()}</div>}
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -95,6 +121,11 @@ class Board extends React.Component {
           {this.renderSquare(6)}
           {this.renderSquare(7)}
           {this.renderSquare(8)}
+        </div>
+        <div className="reset">
+          <button onClick={() => this.reset()} type="button">
+            Reset
+          </button>
         </div>
       </div>
     );
