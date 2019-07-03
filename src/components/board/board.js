@@ -1,11 +1,16 @@
 import React from 'react';
 import Square from '../square/square';
+import Score from '../score/score';
 import './board.css';
 
 class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      score: {
+        X: 0,
+        O: 0
+      },
       isGameFinished: false,
       winner: null,
       squares: Array(9).fill(null),
@@ -13,6 +18,9 @@ class Board extends React.Component {
     };
   }
 
+  /**
+   * Called when the component did update
+   */
   componentDidUpdate() {
     const { isGameFinished } = this.state;
     if (!isGameFinished) {
@@ -20,11 +28,21 @@ class Board extends React.Component {
     }
   }
 
+  /**
+   * It returns the name of the player who have to play
+   */
   getCurrentPlayer() {
     const { xIsNext } = this.state;
     return xIsNext ? 'X' : 'O';
   }
 
+  /**
+   * It returns the status of the game
+   * It can be :
+   * - Player {name} must play
+   * - Player {name} won
+   * - It's a tie
+   */
   getStatus() {
     const { isGameFinished, winner } = this.state;
     let status;
@@ -36,6 +54,22 @@ class Board extends React.Component {
     return status;
   }
 
+  /**
+   * It returns the score for a given player name
+   * @param {String} playerName the playerName
+   * @returns {Number} the score of the player
+   */
+  getScore(playerName) {
+    const { score } = this.state;
+
+    return score[playerName];
+  }
+
+  /**
+   * Check if the game is finished
+   * If it's finished, it set the state isGameFinished at true and the winner.
+   * If there is no winned, it set winner to null.
+   */
   isGameFinished() {
     const { squares } = this.state;
 
@@ -60,17 +94,28 @@ class Board extends React.Component {
           squares[a] === squares[b] &&
           squares[b] === squares[c]
         ) {
-          this.setState({ isGameFinished: true, winner: squares[a] });
+          const { score } = this.state;
+          score[squares[a]] += 1;
+          this.setState({ isGameFinished: true, winner: squares[a], score });
         }
       }
     }
   }
 
+  /**
+   * It change the the state of xIsNext to follow which player have to play
+   */
   changeCurrentPlayer() {
     const { xIsNext } = this.state;
     this.setState({ xIsNext: !xIsNext });
   }
 
+  /**
+   * It's the function which handle the click on a square
+   * It test that the square is not empty and that the game is not finished
+   * Then it put the correct symbol in the square and change the current player
+   * @param {Number} i
+   */
   handleClick(i) {
     const { squares, isGameFinished } = this.state;
     const newSquares = { ...squares };
@@ -82,6 +127,9 @@ class Board extends React.Component {
     this.changeCurrentPlayer();
   }
 
+  /**
+   * It reset the board to launch a new game
+   */
   reset() {
     this.setState({
       isGameFinished: false,
@@ -91,6 +139,10 @@ class Board extends React.Component {
     });
   }
 
+  /**
+   * It create a square with a given value
+   * @param {Number} i it's the value to pass to the Square component
+   */
   renderSquare(i) {
     const { squares } = this.state;
     return (
@@ -127,6 +179,7 @@ class Board extends React.Component {
             Reset
           </button>
         </div>
+        <Score scoreX={this.getScore('X')} scoreO={this.getScore('O')} />
       </div>
     );
   }

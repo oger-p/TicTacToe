@@ -1,4 +1,4 @@
-.board-row:after {
+.board-row {
   clear: both;
   content: '';
   display: table;

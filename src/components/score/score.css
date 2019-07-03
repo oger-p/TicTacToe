@@ -1,0 +1,9 @@
+.score {
+  width: auto;
+  margin-top: 15px;
+  border: solid;
+}
+.score-row {
+  margin: 5px 0px 5px 5px;
+  display: table;
+}
