@@ -66,6 +66,38 @@ class Board extends React.Component {
   }
 
   /**
+   * It check that there is a winner for the board
+   * @param {Array} squares all the squares to check
+   * @returns {boolean} it returns true or false if there is a winner or not
+   */
+  checkWinner(squares) {
+    const winningLines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+    for (let i = 0; i < winningLines.length; i += 1) {
+      const [a, b, c] = winningLines[i];
+      if (
+        squares[a] &&
+        squares[a] === squares[b] &&
+        squares[b] === squares[c]
+      ) {
+        const { score } = this.state;
+        score[squares[a]] += 1;
+        this.setState({ isGameFinished: true, winner: squares[a], score });
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Check if the game is finished
    * If it's finished, it set the state isGameFinished at true and the winner.
    * If there is no winned, it set winner to null.
@@ -73,33 +105,10 @@ class Board extends React.Component {
   isGameFinished() {
     const { squares } = this.state;
 
-    if (Object.values(squares).indexOf(null) === -1) {
-      this.setState({ isGameFinished: true, winner: null });
-    } else {
-      const winningLines = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6]
-      ];
-
-      for (let i = 0; i < winningLines.length; i += 1) {
-        const [a, b, c] = winningLines[i];
-        if (
-          squares[a] &&
-          squares[a] === squares[b] &&
-          squares[b] === squares[c]
-        ) {
-          const { score } = this.state;
-          score[squares[a]] += 1;
-          this.setState({ isGameFinished: true, winner: squares[a], score });
-        }
+    if (!this.checkWinner(squares))
+      if (Object.values(squares).indexOf(null) === -1) {
+        this.setState({ isGameFinished: true });
       }
-    }
   }
 
   /**
